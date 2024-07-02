@@ -1,10 +1,16 @@
 package com.tencent.mobileqq.dt.model;
 
+import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Hex;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import moe.fuqiuluo.signfaker.logger.TextLogger;
+import online.Hanahime.signfaker.tools.FEBoundDetectionFlags;
+
 
 public class FEBound {
     private static final int LEVEL1 = 32;
@@ -38,7 +44,32 @@ public class FEBound {
         }
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     public static byte[] transform(int i2, byte[] bArr) {
+
+        String LAST_DETECTION_FLAGS = "Unable to obtain detection flags!";
+        String pendingHex = Hex.encodeHexString (bArr);
+        String start = "0100";
+        String end = "7FFF";
+        int length = 20;
+        String[] result = FEBoundDetectionFlags.DecodeFlags(pendingHex, start, end, length);
+        LAST_DETECTION_FLAGS = result[0];
+        TextLogger.INSTANCE.log(String.format(
+            "Hooked transform: HexKeywordStart = %s\nHexKeywordEnd = %s\nHexPickUpLength = %d\nCurrentHexKeyword = %s\nbArr = %s\nbArr = %s\nDETECTION_FLAGS: %s",
+            start, end, length, result[1], pendingHex, Arrays.toString (bArr),LAST_DETECTION_FLAGS
+        ));
+
         try {
             byte[] bArr2 = new byte[bArr.length];
             byte[][] bArr3 = mConfigEnCode;
