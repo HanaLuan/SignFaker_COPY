@@ -6,7 +6,7 @@ import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public static class FEBoundDetectionFlags {
+public class ShowDetFlag {
 
     public static String bytesToHex (byte[] bytes) {
         StringBuilder hexString = new StringBuilder ();

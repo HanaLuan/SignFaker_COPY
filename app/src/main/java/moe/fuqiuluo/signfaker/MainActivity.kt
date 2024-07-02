@@ -1,8 +1,13 @@
 package moe.fuqiuluo.signfaker
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Message
 import android.provider.Settings
@@ -10,15 +15,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.tencent.beacon.event.UserAction
+import com.tencent.mmkv.MMKV
 import com.tencent.mobileqq.channel.ChannelManager
 import com.tencent.mobileqq.channel.ChannelProxy
 import com.tencent.mobileqq.dt.app.Dtc
 import com.tencent.mobileqq.fe.FEKit
 import com.tencent.mobileqq.qsec.qsecurity.QSecConfig
 import com.tencent.mobileqq.sign.QQSecuritySign
-import com.tencent.qphone.base.BaseConstants
-import com.tencent.qphone.base.util.CodecWarpper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,10 +31,15 @@ import moe.fuqiuluo.signfaker.http.HttpServer
 import moe.fuqiuluo.signfaker.logger.TextLogger
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
 import moe.fuqiuluo.signfaker.proxy.ProxyContext
+import online.Eruru.Config
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.ref.WeakReference
 import java.security.Security
 import java.util.concurrent.atomic.AtomicBoolean
+
 
 class MainActivity : AppCompatActivity() {
     init {
@@ -40,6 +50,19 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var input: EditText
     lateinit var send: Button
+
+    private fun getAppPackageName(packageManager: PackageManager): String? {
+        try {
+            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+            val realPkgName = applicationInfo.packageName
+            log("获取到自身包名: $realPkgName")
+            return realPkgName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+        log("获取自身包名失败...")
+        return "moe.fuqiuluo.signfaker"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +81,48 @@ class MainActivity : AppCompatActivity() {
 
         input = findViewById(R.id.input)
         send = findViewById(R.id.send)
+        val REQUEST_CODE = 100
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:$packageName"))
+                startActivityForResult(intent, REQUEST_CODE)
+            }
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), REQUEST_CODE)
+        }
+        MMKV.initialize(this)  // 程序入口初始化
+
+
+        try {
+            Config.AppPackageName = getAppPackageName(packageManager);
+//            val file = File(
+//                String.format (
+//                    "%s/Android/data/%s/Config.json", Environment.getExternalStorageDirectory (), Config.AppPackageName
+//                )
+//            )
+            val fileName = "Config.json"
+            val directory = File (String.format ("%s/%s", Environment.getExternalStorageDirectory (), Config.AppPackageName));
+            log(directory.path)
+            directory.mkdirs()
+            log(directory.exists().toString())
+            val file = File (String.format ("%s/%s", directory, fileName));
+            log(file.path)
+            file.createNewFile();
+                FileOutputStream(file).use { fos ->
+                    fos.write("Hello, World!".toByteArray())
+                }
+        } catch (e : Exception) {
+            log(e.toString ())
+        }
+
+        val mmkv= MMKV.mmkvWithID("ruru")  // 通过ID拿到对应MMKV进行操作，在任何地方都可以随时使用
+        mmkv.putString("key", "value")
+        mmkv.encode("key1", "value1")//可能是加密存储
+        log(mmkv.getString("key", "default value").toString())
+        log(mmkv.decodeString("key1", "default value1").toString ())
 
         if (isInit.compareAndSet(false, true)) {
             GlobalScope.launch {

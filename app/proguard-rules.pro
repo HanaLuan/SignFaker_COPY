@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Keep Class: COM.TENCENT.MOBILEQQ
--keep class com.tencent.mobileqq.** { *; }
+-keep class com.tencent.** { *; }
