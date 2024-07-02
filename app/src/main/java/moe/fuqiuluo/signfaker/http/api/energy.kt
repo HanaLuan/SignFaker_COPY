@@ -6,6 +6,9 @@ import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
+import io.ktor.utils.io.core.buildPacket
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.core.writeLong
 import moe.fuqiuluo.signfaker.ext.Crypt
 import moe.fuqiuluo.signfaker.http.ext.APIResult
 import moe.fuqiuluo.signfaker.http.ext.failure
@@ -60,10 +63,12 @@ fun Routing.energy() {
                 salt.array()
             }
             "v2" -> {
+                // val uin=(fetchGet("uin", err = "lack of uin") ?: return@get).toLong()
                 val version = fetchGet("version",  err = "lack of version") ?: return@get
                 val guid = (fetchGet("guid", err = "lack of guid") ?: return@get).hex2ByteArray()
                 val sub = data.substring(4).toInt(16)
                 val salt = ByteBuffer.allocate(4 + 2 + guid.size + 2 + 10 + 4 + 4)
+                // salt.putInt((uin shr (4 * 8)).toInt())
                 salt.putInt(0)
                 salt.putShort(guid.size.toShort())
                 salt.put(guid)

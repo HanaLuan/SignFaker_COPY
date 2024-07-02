@@ -60,6 +60,7 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 
     implementation files('libs/beacon_android_v3.2.0.3_official64_release.jar')
+    implementation 'com.google.firebase:firebase-crashlytics-buildtools:3.0.2'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
