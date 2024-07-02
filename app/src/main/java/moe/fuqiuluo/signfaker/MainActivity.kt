@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         log("获取自身包名失败...")
-        return "moe.fuqiuluo.signfaker"
+        return "moe.hanahime.signfaker"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +81,15 @@ class MainActivity : AppCompatActivity() {
 
         input = findViewById(R.id.input)
         send = findViewById(R.id.send)
+
+        MMKV.initialize(this)  // 程序入口初始化 MMKV
+        val mmkv= MMKV.mmkvWithID("ruru")  // 通过ID拿到对应MMKV进行操作，在任何地方都可以随时使用
+        mmkv.putString("Hi", "Hello")
+        mmkv.encode("Eruru", "World")//可能是加密存储
+        log(mmkv.getString("Hi", "Something Wrongs").toString())
+        log(mmkv.decodeString("Eruru", "Please Check").toString ())
+
+        // 弹出授权界面
         val REQUEST_CODE = 100
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
@@ -93,16 +102,10 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             ), REQUEST_CODE)
         }
-        MMKV.initialize(this)  // 程序入口初始化
 
-
+        // 测试一下
         try {
             Config.AppPackageName = getAppPackageName(packageManager);
-//            val file = File(
-//                String.format (
-//                    "%s/Android/data/%s/Config.json", Environment.getExternalStorageDirectory (), Config.AppPackageName
-//                )
-//            )
             val fileName = "Config.json"
             val directory = File (String.format ("%s/%s", Environment.getExternalStorageDirectory (), Config.AppPackageName));
             log(directory.path)
@@ -111,18 +114,12 @@ class MainActivity : AppCompatActivity() {
             val file = File (String.format ("%s/%s", directory, fileName));
             log(file.path)
             file.createNewFile();
-                FileOutputStream(file).use { fos ->
-                    fos.write("Hello, World!".toByteArray())
-                }
+            FileOutputStream(file).use { fos ->
+                fos.write("Hello, World!".toByteArray())
+            }
         } catch (e : Exception) {
             log(e.toString ())
         }
-
-        val mmkv= MMKV.mmkvWithID("ruru")  // 通过ID拿到对应MMKV进行操作，在任何地方都可以随时使用
-        mmkv.putString("key", "value")
-        mmkv.encode("key1", "value1")//可能是加密存储
-        log(mmkv.getString("key", "default value").toString())
-        log(mmkv.decodeString("key1", "default value1").toString ())
 
         if (isInit.compareAndSet(false, true)) {
             GlobalScope.launch {

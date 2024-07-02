@@ -1,17 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id "org.jetbrains.kotlin.plugin.serialization" version "1.8.22"
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.9.22"
 }
 
 android {
     namespace 'moe.fuqiuluo.signfaker'
-    compileSdk 33
+    compileSdk 35
 
     defaultConfig {
         applicationId "moe.fuqiuluo.signfaker"
         minSdk 26
-        targetSdk 33
+        targetSdk 35
         versionCode 2
         versionName "1.0.1"
 
@@ -46,10 +46,10 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "io.ktor:ktor-server-host-common:$ktor_version"
