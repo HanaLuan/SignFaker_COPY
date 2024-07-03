@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "SignFaker"
-include ':app'
+include(":app")

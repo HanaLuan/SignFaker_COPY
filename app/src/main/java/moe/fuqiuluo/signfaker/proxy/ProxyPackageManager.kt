@@ -31,7 +31,7 @@ class ProxyPackageManager(
     override fun getPackageInfo(name: String, flags: Int): PackageInfo {
         log("getPackageInfo($name, $flags)")
         if (name == "com.tencent.mobileqq") {
-            return myPackageManager.getPackageInfo("moe.fuqiuluo.signfaker", flags).also {
+            return myPackageManager.getPackageInfo("moe.fuqiuluo.sign faker", flags).also {
                 //it.packageName = name
                 it.versionName = "8.9.68"
                 it.versionCode = 4264
@@ -365,22 +365,27 @@ class ProxyPackageManager(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getInstallerPackageName(p0: String): String? {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun addPackageToPreferred(p0: String) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun removePackageFromPreferred(p0: String) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPreferredPackages(p0: Int): MutableList<PackageInfo> {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun addPreferredActivity(
         p0: IntentFilter,
         p1: Int,
@@ -390,10 +395,12 @@ class ProxyPackageManager(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun clearPackagePreferredActivities(p0: String) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPreferredActivities(
         p0: MutableList<IntentFilter>,
         p1: MutableList<ComponentName>,

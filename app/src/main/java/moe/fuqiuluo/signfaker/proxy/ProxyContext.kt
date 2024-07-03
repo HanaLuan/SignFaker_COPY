@@ -1,5 +1,6 @@
 package moe.fuqiuluo.signfaker.proxy
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -192,6 +193,7 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getExternalMediaDirs(): Array<File> {
         TODO("Not yet implemented")
     }
@@ -238,30 +240,37 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getWallpaper(): Drawable {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun peekWallpaper(): Drawable {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getWallpaperDesiredMinimumWidth(): Int {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getWallpaperDesiredMinimumHeight(): Int {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setWallpaper(p0: Bitmap?) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setWallpaper(p0: InputStream?) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun clearWallpaper() {
         TODO("Not yet implemented")
     }
@@ -342,10 +351,12 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun sendStickyBroadcast(p0: Intent?) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun sendStickyOrderedBroadcast(
         p0: Intent?,
         p1: BroadcastReceiver?,
@@ -357,14 +368,17 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun removeStickyBroadcast(p0: Intent?) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun sendStickyBroadcastAsUser(p0: Intent?, p1: UserHandle?) {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun sendStickyOrderedBroadcastAsUser(
         p0: Intent?,
         p1: UserHandle?,
@@ -377,6 +391,7 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("TODO(\"Not yet implemented\")"))
     override fun removeStickyBroadcastAsUser(p0: Intent?, p1: UserHandle?) {
         TODO("Not yet implemented")
     }
@@ -425,7 +440,7 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
-    override fun bindService(p0: Intent?, p1: ServiceConnection, p2: Int): Boolean {
+    override fun bindService(p0: Intent, p1: ServiceConnection, p2: Int): Boolean {
         TODO("Not yet implemented")
     }
 
@@ -542,6 +557,7 @@ class ProxyContext(
         return myContext.createPackageContext(p0, p1)
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun createContextForSplit(p0: String?): Context {
         log("ccfs")
