@@ -1,4 +1,4 @@
-package online.Eruru;
+package online.eruru;
 
 import java.util.Map;
 

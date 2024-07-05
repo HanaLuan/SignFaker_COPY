@@ -31,7 +31,7 @@ import moe.fuqiuluo.signfaker.http.HttpServer
 import moe.fuqiuluo.signfaker.logger.TextLogger
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
 import moe.fuqiuluo.signfaker.proxy.ProxyContext
-import online.Eruru.Config
+import online.eruru.Config
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.io.File
 import java.io.FileOutputStream

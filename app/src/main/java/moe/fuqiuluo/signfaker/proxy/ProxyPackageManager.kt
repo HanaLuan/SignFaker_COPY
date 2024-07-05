@@ -31,7 +31,7 @@ class ProxyPackageManager(
     override fun getPackageInfo(name: String, flags: Int): PackageInfo {
         log("getPackageInfo($name, $flags)")
         if (name == "com.tencent.mobileqq") {
-            return myPackageManager.getPackageInfo("moe.fuqiuluo.sign faker", flags).also {
+            return myPackageManager.getPackageInfo("moe.fuqiuluo.signfaker", flags).also {
                 //it.packageName = name
                 it.versionName = "8.9.68"
                 it.versionCode = 4264

@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSON;
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Hex;
 import com.tencent.mmkv.MMKV;
 import online.Eruru.Config;
+
+import online.eruru.Config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,9 +34,9 @@ public class FEBound {
 
     private static void initAssertConfig() {
         Config = JSON.parseObject (String.format (
-            "%s/Android/media/%s/Config.json", Environment.getExternalStorageDirectory (), online.Eruru.Config.AppPackageName
-        ), online.Eruru.Config.class);
-        Byte[][] codes = Config.CodeTable.get ("en");
+            "%s/Android/media/%s/Config.json", Environment.getExternalStorageDirectory (), online.eruru.Config.AppPackageName
+        ), online.eruru.Config.class);
+        Byte[][] codes = Config.codeTable.get ("en");
 
     }
 

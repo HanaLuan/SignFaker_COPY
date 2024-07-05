@@ -4,7 +4,7 @@ import android.content.pm.ApplicationInfo
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
 
 class ProxyApplicationInfo(
-    val myApplicationInfo: ApplicationInfo
+    private val myApplicationInfo: ApplicationInfo
 ): ApplicationInfo() {
     init {
         targetSdkVersion = 28

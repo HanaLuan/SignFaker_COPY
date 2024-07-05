@@ -1,8 +1,13 @@
-package online.Hanahime.signfaker.tools;
+package online.hanahime.signfaker.tools;
+
+import static java.lang.String.*;
+
+import android.annotation.SuppressLint;
 
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.DecoderException;
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Hex;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,18 +66,18 @@ public class ShowDetFlag {
     public static String Decode (String hex, String hexKeyword, int length) {
         String LAST_DETECTION_FLAGS = "Unable to obtain detection flags!";
         try {
-            Matcher matcher = Pattern.compile (String.format ("%s([a-zA-Z0-9]{%d})", hexKeyword, length), Pattern.CASE_INSENSITIVE).matcher (hex);
+            @SuppressLint("DefaultLocale") Matcher matcher = Pattern.compile (format ("%s([a-zA-Z0-9]{%d})", hexKeyword, length), Pattern.CASE_INSENSITIVE).matcher (hex);
             if (!matcher.find ()) {
                 return LAST_DETECTION_FLAGS;
             }
-            byte[] detectionFlags = Hex.decodeHex (matcher.group (1).toCharArray ());
+            byte[] detectionFlags = Hex.decodeHex (Objects.requireNonNull(matcher.group(1)).toCharArray ());
             byte pwd = detectionFlags[0];
             for (int i = 0; i < detectionFlags.length; i++) {
                 detectionFlags[i] = (byte) (detectionFlags[i] ^ pwd);
                 LAST_DETECTION_FLAGS = Hex.encodeHexString (detectionFlags);
             }
         } catch (DecoderException e) {
-            LAST_DETECTION_FLAGS = String.valueOf (e);
+            LAST_DETECTION_FLAGS = valueOf (e);
         }
         return LAST_DETECTION_FLAGS;
     }
