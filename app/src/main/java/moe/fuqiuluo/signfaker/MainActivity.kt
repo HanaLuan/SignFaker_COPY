@@ -24,6 +24,7 @@ import com.tencent.mobileqq.dt.app.Dtc
 import com.tencent.mobileqq.fe.FEKit
 import com.tencent.mobileqq.qsec.qsecurity.QSecConfig
 import com.tencent.mobileqq.sign.QQSecuritySign
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -35,15 +36,18 @@ import online.eruru.Config
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.lang.ref.WeakReference
 import java.security.Security
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 class MainActivity : AppCompatActivity() {
+
+    var global = moe.fuqiuluo.signfaker.ext.GlobalData()
+
     init {
         Security.addProvider(BouncyCastleProvider())
+        global["PACKET"] = arrayListOf<moe.fuqiuluo.signfaker.ext.SsoPacket>()
     }
 
     private val isInit = AtomicBoolean(false)
@@ -64,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         return "moe.hanahime.signfaker"
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -86,8 +91,9 @@ class MainActivity : AppCompatActivity() {
         val mmkv= MMKV.mmkvWithID("ruru")  // 通过ID拿到对应MMKV进行操作，在任何地方都可以随时使用
         mmkv.putString("Hi", "Hello")
         mmkv.encode("Eruru", "World")//可能是加密存储
-        log(mmkv.getString("Hi", "Something Wrongs").toString())
-        log(mmkv.decodeString("Eruru", "Please Check").toString ())
+        log(String.format("%s %s!",
+            mmkv.getString("Hi", "Something Wrongs").toString(),
+            mmkv.decodeString("Eruru", "Please Check").toString()))
 
         // 弹出授权界面
         val REQUEST_CODE = 100
@@ -172,6 +178,7 @@ class MainActivity : AppCompatActivity() {
         HttpServer(port)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private suspend fun initFEKit() {
         val ctx = ProxyContext(this)
         Dtc.ctx = WeakReference(ctx)
@@ -205,11 +212,22 @@ class MainActivity : AppCompatActivity() {
         log("你的androidId输入为[$androidId]")
         Settings.System.putString(cs, "android_id", androidId)
         Dtc.androidId = androidId
-
+        log("尝试载入FEKIT二进制库...")
+        System.loadLibrary("fekit")
+        log("载入FEKIT二进制库成功...")
         FEKit.init(qua, qimei, androidId, ctx)
-        ChannelManager.setChannelProxy(object: ChannelProxy() {
+/*        ChannelManager.setChannelProxy(object: ChannelProxy() {
             override fun sendMessage(cmd: String, buffer: ByteArray, id: Long) {
                 log("ChannelProxy.sendMessage($cmd, $buffer, $id)")
+            }
+        })*/
+        ChannelManager.setChannelProxy(object: ChannelProxy() {
+            override fun sendMessage(cmd: String, buffer: ByteArray, id: Long) {
+                val hex = buffer.toHexString()
+                if (id == -1L) return
+                (global["PACKET"] as ArrayList<moe.fuqiuluo.signfaker.ext.SsoPacket>).add(moe.fuqiuluo.signfaker.ext.SsoPacket(cmd, hex, id))
+                log("ChannelProxy.sendMessage($cmd, $buffer, $id)")
+                return
             }
         })
         ChannelManager.initReport(QSecConfig.business_qua, "7.0.300", Build.VERSION.RELEASE, Build.BRAND + Build.MODEL, QSecConfig.business_q36, QSecConfig.business_guid)

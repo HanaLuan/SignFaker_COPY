@@ -35,15 +35,59 @@ import java.io.InputStream
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
 
 class ProxyContext(
-    private val myContext: Context
+    private val myContext: Context,
+    str: String = ""
 ): Application() {
+
+    // 抄的别人代码,不一定靠谱
+    /*~~Start~~*/
+    private val contentResolver: ContentResolver
+    private val fakePackageManager: PackageManager
+    private val fekitDir: File
+    private val realFilesDir: String
+    private val realLibDir: String
+
+    init {
+        val resolve = File(myContext.cacheDir, "fekit")
+        this.fekitDir = resolve
+        val resolve2 = File(
+            if (str.isBlank()) { File(File(resolve, "data"), str ) }
+            else { File(resolve, "data") },
+            "files"
+        )
+        resolve2.deleteRecursively()
+        File(resolve2, "5463306EE50FE3AA").mkdirs()
+        this.realFilesDir = resolve2.absolutePath
+        this.realLibDir = myContext.applicationInfo.nativeLibraryDir
+        this.fakePackageManager = myContext.packageManager
+        this.contentResolver = myContext.contentResolver
+    }
+
+    private fun getFakeApplicationInfo(applicationInfo: ApplicationInfo, realLibDir: String): ApplicationInfo {
+        val proxyApplicationInfo = ProxyApplicationInfo(ApplicationInfo())
+        proxyApplicationInfo.packageName = applicationInfo.packageName
+        proxyApplicationInfo.className = applicationInfo.className
+        proxyApplicationInfo.targetSdkVersion = 31
+        proxyApplicationInfo.nativeLibraryDir = realLibDir
+        proxyApplicationInfo.flags = applicationInfo.flags and (-3)
+        log(String.format(
+            "FakePackageName = %s\nFakeClassName = %s\nFakeTargetSdkVersion = %s\nFakeNativeLibraryDir = %s",
+            applicationInfo.packageName,
+            applicationInfo.className,
+            proxyApplicationInfo.targetSdkVersion,
+            realFilesDir)
+        )
+        return proxyApplicationInfo
+    }
+    /*~~End~~*/
+
     override fun getAssets(): AssetManager {
         log("getAssets()")
         return myContext.assets
     }
 
     override fun getResources(): Resources {
-        log("res")
+        log("getResources() => Real")
         return myContext.resources
     }
 
@@ -68,17 +112,17 @@ class ProxyContext(
     }
 
     override fun setTheme(p0: Int) {
-        log("st")
+        log("Proxy => setTheme($p0)")
         setTheme(p0)
     }
 
     override fun getTheme(): Resources.Theme {
-        log("gt")
+        log("Proxy => getTheme() -> ${myContext.theme}")
         return myContext.theme
     }
 
     override fun getClassLoader(): ClassLoader {
-        log("gc")
+        log("Proxy => getClassLoader() -> ${myContext.classLoader}")
         return myContext.classLoader
     }
 
@@ -88,12 +132,16 @@ class ProxyContext(
     }
 
     override fun getApplicationInfo(): ApplicationInfo {
-        log("Proxy => getApplicationInfo() from ProxyApplicationInfo")
-        return ProxyApplicationInfo(myContext.applicationInfo)
+//        log("Proxy => getApplicationInfo() from ProxyApplicationInfo -> ${myContext.applicationInfo}")
+//        return ProxyApplicationInfo(myContext.applicationInfo)
+//    }
+        val applicationInfo = getFakeApplicationInfo(myContext.applicationInfo, this.realLibDir)
+        log("Proxy => getApplicationInfo() from ProxyApplicationInfo -> $applicationInfo")
+        return applicationInfo
     }
 
     override fun getPackageResourcePath(): String {
-        log("Proxy => getPackageResourcePath()")
+        log("Proxy => getPackageResourcePath() -> ${myContext.packageResourcePath}")
         return myContext.packageResourcePath
     }
 
@@ -396,9 +444,14 @@ class ProxyContext(
         TODO("Not yet implemented")
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun registerReceiver(receiver: BroadcastReceiver?, intent: IntentFilter): Intent? {
         log("registerReceiver(${receiver.toString()}, $intent)")
-        return myContext.registerReceiver(receiver, intent)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            myContext.registerReceiver(receiver, intent, RECEIVER_NOT_EXPORTED)
+        } else {
+            myContext.registerReceiver(receiver, intent)
+        }
     }
 
     override fun registerReceiver(p0: BroadcastReceiver?, p1: IntentFilter?, p2: Int): Intent? {

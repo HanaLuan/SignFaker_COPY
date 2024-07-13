@@ -1,5 +1,5 @@
 package com.tencent.mobileqq.qsec.qsecdandelionsdk
 
 object Dandelion {
-    external fun energy(obj: Any, obj2: Any): ByteArray?
+    external fun energy(data: Any, salt: Any): ByteArray?
 }

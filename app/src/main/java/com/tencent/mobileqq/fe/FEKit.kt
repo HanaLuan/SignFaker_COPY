@@ -14,9 +14,9 @@ import java.io.File
 object FEKit {
     fun init(qua: String, qimei: String, androidId: String, proxyContext: ProxyContext) {
         kotlin.runCatching {
-            log("尝试载入FEKIT二进制库...")
-            System.loadLibrary("fekit")
-            log("载入FEKIT二进制库成功...")
+//            log("尝试载入FEKIT二进制库...")
+//            System.loadLibrary("fekit")
+//            log("载入FEKIT二进制库成功...")
 
             QSecConfig.setupBusinessInfo(proxyContext, "0", MD5.toMD5(androidId + "02:00:00:00:00:00"), "", "", qimei, qua)
 
@@ -27,7 +27,7 @@ object FEKit {
 
             val file = File(proxyContext.getFilesDirV2(), "5463306EE50FE3AA")
             if (!file.exists()) {
-                log("目录`5463306EE50FE3AA`不存在，创建成功！")
+                log("目录 5463306EE50FE3AA 不存在，创建成功！")
                 file.mkdirs()
             }
             Dtn.initContext(proxyContext, file.absolutePath)

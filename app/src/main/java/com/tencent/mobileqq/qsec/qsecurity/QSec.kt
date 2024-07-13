@@ -7,6 +7,8 @@ object QSec {
 
     external fun doSomething(context: Context, i2: Int): Int
 
+    external fun getXwDebugID(str: String?): ByteArray?
+
     fun updateO3DID(str: String) {
         QSecConfig.business_o3did = str
     }

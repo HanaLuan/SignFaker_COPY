@@ -14,11 +14,13 @@ object ChannelManager {
 
     external fun getCmdWhiteList(): ArrayList<String>
 
-    external fun onNativeReceive(str: String, bArr: ByteArray, z: Boolean, j2: Long)
+    external fun onNativeReceive(cmd: String?, buffer: ByteArray?, codeIs1000: Boolean, code: Int, callbackId: Long)
+
+    // external fun onNativeReceive(str: String, bArr: ByteArray, z: Boolean, j2: Long)
 
     external fun sendMessageTest()
 
-    external fun setChannelProxy(channelProxy: ChannelProxy)
+    external fun setChannelProxy(channelProxy: ChannelProxy?)
 
     external fun setCmdWhiteListChangeCallback(cmdWhiteListChangeCallback: CmdWhiteListChangeCallback)
 }

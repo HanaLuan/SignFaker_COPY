@@ -6,7 +6,6 @@ import android.os.Environment;
 import com.alibaba.fastjson2.JSON;
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Hex;
 import com.tencent.mmkv.MMKV;
-import online.eruru.Config;
 
 import online.eruru.Config;
 import org.json.JSONArray;
@@ -100,12 +99,14 @@ public class FEBound {
                 if (bArr4.length == 32 && i2 == 2) {
                     transformInner(bArr, bArr2, bArr4);
                 } else {
-                    TextLogger.INSTANCE.log("transform error!");
+                    // [FEBound] Type_Encode, "transform error!"
+                    TextLogger.INSTANCE.log(String.format("[FEBound] %s, TransformError!\n[FEBound]", Type_Encode));
                 }
             }
             return bArr2;
         } catch (Throwable th) {
-            TextLogger.INSTANCE.log("encode error!" + th);
+            // [FEBound] Type_Encode, "encode error!" + th
+            TextLogger.INSTANCE.log(String.format("[FEBound] %s, EncodeError!\n[FEBound] Trace: %s", Type_Encode, th));
             return null;
         }
     }
