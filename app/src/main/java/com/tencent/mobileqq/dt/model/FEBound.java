@@ -1,11 +1,12 @@
 package com.tencent.mobileqq.dt.model;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Hex;
 import com.tencent.mmkv.MMKV;
-import online.Eruru.Config;
+import online.eruru.Config;
 
 import online.eruru.Config;
 import org.json.JSONArray;
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import kotlinx.serialization.json.Json;
 import kotlinx.serialization.json.JsonObject;
 import moe.fuqiuluo.signfaker.logger.TextLogger;
-import online.Hanahime.signfaker.tools.ShowDetFlag;
+import online.hanahime.signfaker.tools.ShowDetFlag;
 
 public class FEBound {
     private static final int LEVEL1 = 32;
@@ -71,6 +72,7 @@ public class FEBound {
         return new String(hexChars);
     }
 
+    @SuppressLint("DefaultLocale")
     public static byte[] transform(int i2, byte[] bArr) {
 
         String LAST_DETECTION_FLAGS = "Unable to obtain detection flags!";

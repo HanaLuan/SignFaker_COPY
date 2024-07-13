@@ -18,6 +18,7 @@ import moe.fuqiuluo.signfaker.http.ext.toHexString
 import moe.fuqiuluo.utils.MD5
 import java.nio.ByteBuffer
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
+import java.security.InvalidParameterException
 
 fun Routing.energy() {
     get("/custom_energy") {
@@ -40,7 +41,7 @@ fun Routing.energy() {
         val mode = fetchGet("mode", def = when(data) {
             "810_d", "810_a", "810_f", "810_9" -> "v2"
             "810_2", "810_25", "810_7", "810_24" -> "v1"
-            "812_a" -> "v3"
+            "812_b", "812_a" -> "v3"
             "812_5" -> "v4"
             else -> ""
         })?.also {
