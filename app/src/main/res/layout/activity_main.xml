@@ -20,7 +20,7 @@
                 android:layout_width="match_parent"
                 android:textIsSelectable="true"
                 android:layout_height="wrap_content"
-                android:text="Hello World!"
+                android:text="每个人都是生命中的过路的人，而我也在路途中。"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -37,6 +37,7 @@
             <EditText
                 android:id="@+id/input"
                 android:layout_weight="1"
+                android:hint="@string/text_input_box_prompt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:autofillHints="Write Data"

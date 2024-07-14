@@ -23,8 +23,8 @@ data class APIInfo(
 
 fun Routing.index() {
     get("/") {
-        val out = APIResult(0, "IAA 云天明 章北海 王淼", APIInfo(
-            version = "1.0.0",
+        val out = APIResult(0, "IAA", APIInfo(
+            version = "1.1.6",
             appVersion = "${Config.AppVersionName}/${Config.AppVersionCode}",
             protocol = "v8.9.68",
             pid = android.os.Process.myPid().toUInt()

@@ -175,5 +175,11 @@
 -dontwarn sun.security.x509.X509CertImpl
 -dontwarn sun.security.x509.X509CertInfo
 
+# Keep Class: Prevent release-variation crashes caused by "isMinifyEnabled = true"
+-keep class assets.beaconcomp.** { *; }
+-keep class io.** { *; }
+-keep class kotlin.** { *; }
+-keep class kotlinx.** { *; }
+
 # Keep Class: COM.TENCENT.MOBILEQQ
 -keep class com.tencent.** { *; }

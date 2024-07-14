@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SignFaker</string>
     <string name="send">Send</string>
+    <string name="text_input_box_prompt" translatable="false">慢也好，步伐小也罢，是往前走就好。</string>
 </resources>
