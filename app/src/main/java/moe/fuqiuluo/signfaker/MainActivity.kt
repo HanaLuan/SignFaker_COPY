@@ -55,10 +55,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var input: EditText
     lateinit var send: Button
 
-    private fun getAppPackageName(packageManager: PackageManager): String? {
+    private fun getAppPackageName(packageManager: PackageManager): String {
         try {
-            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-            val realPkgName = applicationInfo.packageName
+            // val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+            val appPackageInfo = packageManager.getPackageInfo(packageName, 0)
+            Config.AppVersionName = appPackageInfo.versionName
+            Config.AppVersionCode = appPackageInfo.versionCode.toString()
+            val realPkgName = appPackageInfo.packageName
             log("获取到自身包名: $realPkgName")
             return realPkgName
         } catch (e: PackageManager.NameNotFoundException) {

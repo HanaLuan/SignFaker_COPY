@@ -16,6 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import moe.fuqiuluo.signfaker.http.api.energy
+import moe.fuqiuluo.signfaker.http.api.getCmdWhitelist
 import moe.fuqiuluo.signfaker.http.api.index
 import moe.fuqiuluo.signfaker.http.api.sign
 import moe.fuqiuluo.signfaker.http.ext.APIResult
@@ -45,6 +46,7 @@ object HttpServer {
             index()
             energy()
             sign()
+            getCmdWhitelist()
         }
     }
 }
