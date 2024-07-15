@@ -27,6 +27,9 @@ object QSecConfig {
     var sContext: Context? = null
     var sign_strategy = 0
 
+    var sign_tail: Int = 0
+
+
     fun setupBusinessInfo(
         context: Context?,
         uin: String?,

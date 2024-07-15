@@ -233,12 +233,12 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         })
-        ChannelManager.initReport(QSecConfig.business_qua, "7.0.300", Build.VERSION.RELEASE, Build.BRAND + Build.MODEL, QSecConfig.business_q36, QSecConfig.business_guid)
-        ChannelManager.setCmdWhiteListChangeCallback {
+        ChannelManager.initReport(QSecConfig.business_qua, "2.2.77")
+        /*ChannelManager.setCmdWhiteListChangeCallback {
             it.forEach {
                 log("Register for cmd: $it")
             }
-        }
+        }*/
     }
 
     /*

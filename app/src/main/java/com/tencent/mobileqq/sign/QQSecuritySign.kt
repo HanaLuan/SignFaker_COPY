@@ -13,12 +13,10 @@ object QQSecuritySign {
         qSec: QSec,
         str: String,
         str2: String,
-        bArr: ByteArray,
-        bArr2: ByteArray,
-        str3: String
+        bArr: ByteArray
     ): SignResult?
 
-    external fun dispatchEvent(str: String, str2: String, eventCallback: EventCallback)
+    external fun dispatchEvent(str: String, str2: String)
 
     external fun dispatchEventPB(str: String, str2: String, bArr: ByteArray, eventCallback: EventCallback)
 

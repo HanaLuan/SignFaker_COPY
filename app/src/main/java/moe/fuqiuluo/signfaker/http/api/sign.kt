@@ -64,7 +64,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(cmd: Stri
         return out
     }
 
-    val sign = QQSecuritySign.getSign(QSec, qua, cmd, buffer, int32ToBuf(seq), uin)!!
+    val sign = QQSecuritySign.getSign(QSec, qua, cmd, buffer)!!
 
     call.respond(
         APIResult(0, "success", Sign(

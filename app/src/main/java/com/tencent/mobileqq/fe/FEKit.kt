@@ -1,7 +1,7 @@
 package com.tencent.mobileqq.fe
 
 import com.tencent.beacon.event.UserAction
-import com.tencent.mobileqq.dt.Dtn
+import com.tencent.mobileqq.dt.dtn
 import com.tencent.mobileqq.fe.utils.DeepSleepDetector
 import com.tencent.mobileqq.qsec.qsecurity.QSec
 import com.tencent.mobileqq.qsec.qsecurity.QSecConfig
@@ -22,17 +22,17 @@ object FEKit {
 
             DeepSleepDetector.startCheck()
 
-            QQSecuritySign.initSafeMode(false)
-            log("设置安全模式 = false")
+//            QQSecuritySign.initSafeMode(false)
+//            log("设置安全模式 = false")
 
             val file = File(proxyContext.getFilesDirV2(), "5463306EE50FE3AA")
             if (!file.exists()) {
                 log("目录 5463306EE50FE3AA 不存在，创建成功！")
                 file.mkdirs()
             }
-            Dtn.initContext(proxyContext, file.absolutePath)
+            dtn.a().initContext(proxyContext)
             log("初始化Dtn成功")
-            Dtn.initLog(object: IFEKitLog() {
+            dtn.a().initLog(object: IFEKitLog() {
                 override fun d(str: String, i2: Int, str2: String) {
                     log("FEKitLogDebug $str: $str2")
                 }
@@ -54,7 +54,7 @@ object FEKit {
                 }
             })
             log("尝试初始化Xwid for empty uin")
-            Dtn.initUin("0")
+            dtn.a().initUin("0")
             log("初始化init_uin成功")
 
             QSec.doSomething(proxyContext, 1)
@@ -68,7 +68,7 @@ object FEKit {
     fun changeUin(uin: Long) {
         UserAction.setQQ(uin.toString())
         QSecConfig.business_uin = uin.toString()
-        Dtn.initUin(uin.toString())
+        dtn.a().initUin(uin.toString())
         log("改变Uin = $uin")
     }
 }
