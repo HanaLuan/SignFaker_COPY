@@ -30,7 +30,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters += "arm64-v8a"
+            abiFilters += "armeabi-v7a"
         }
     }
 
@@ -39,12 +39,12 @@ android {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             ndk {
-                abiFilters += "arm64-v8a"
+                abiFilters += "armeabi-v7a"
             }
         }
         debug {
             ndk {
-                abiFilters += "arm64-v8a"
+                abiFilters += "armeabi-v7a"
             }
         }
     }
@@ -134,7 +134,7 @@ dependencies {
 
     implementation(files("libs/beacon_android_v3.2.0.3_official64_release.jar"))
     implementation("com.google.firebase:firebase-crashlytics-buildtools:3.0.2")
-    implementation("com.tencent:mmkv:1.3.5")
+    implementation("com.tencent:mmkv:1.3.7")
     implementation("com.alibaba:fastjson:2.0.31")
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
 
