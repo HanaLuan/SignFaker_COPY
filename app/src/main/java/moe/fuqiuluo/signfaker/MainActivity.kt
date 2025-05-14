@@ -192,8 +192,8 @@ class MainActivity : AppCompatActivity() {
         var qimei = ""
         UserAction.getQimei {
             log("QIMEI FETCH 成功： $it")
-            qimei = it
-            QSecConfig.business_q36 = it
+            qimei = it.toString()
+            QSecConfig.business_q36 = it.toString()
         }
 
         val qua = "V1_AND_SQ_8.9.68_4264_YYB_D"
