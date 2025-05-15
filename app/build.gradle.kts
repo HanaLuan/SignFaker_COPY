@@ -14,7 +14,7 @@ import java.util.zip.ZipOutputStream
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.21"
 }
 
 android {
@@ -126,11 +126,11 @@ dependencies {
     //implementation ("io.netty:netty-all:4.1.68.Final")
     annotationProcessor ("org.apache.logging.log4j:log4j-core:2.24.3")
     //implementation ("org.apache.logging.log4j:log4j-api:2.19.0")
-    implementation ("org.eclipse.jetty:jetty-servlet:9.4.43.v20210629")
+    implementation ("org.eclipse.jetty:jetty-servlet:11.0.25")
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
 
     implementation("io.ktor:ktor-server-core:$ktor_version")
     implementation("io.ktor:ktor-server-host-common:$ktor_version")
@@ -143,13 +143,10 @@ dependencies {
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
 
-    val libsDir = File("libs")
-    libsDir.listFiles { _, name -> name.endsWith(".aar") }?.forEach { aarFile ->
-        add("implementation", mapOf("name" to aarFile.nameWithoutExtension, "ext" to "aar"))
-    }
+
 
     implementation("com.google.firebase:firebase-crashlytics-buildtools:3.0.3")
-    implementation("com.tencent:mmkv:1.3.5")
+    implementation("com.tencent:mmkv:1.3.14")
     implementation("com.alibaba:fastjson:2.0.57")
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
 
