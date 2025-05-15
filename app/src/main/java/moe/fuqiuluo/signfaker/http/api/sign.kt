@@ -13,34 +13,33 @@ import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.serialization.Serializable
 import moe.fuqiuluo.signfaker.http.ext.APIResult
-import moe.fuqiuluo.signfaker.http.ext.fetchGet
-import moe.fuqiuluo.signfaker.http.ext.fetchPost
 import moe.fuqiuluo.signfaker.http.ext.hex2ByteArray
 import moe.fuqiuluo.signfaker.http.ext.toHexString
+import io.ktor.server.plugins.BadRequestException
 
 
 fun Routing.sign() {
     get("/sign") {
-        val uin = fetchGet("uin")!!
-        val qua = fetchGet("qua", QSecConfig.business_qua)!!
-        val cmd = fetchGet("cmd")!!
-        val seq = fetchGet("seq")!!.toInt()
-        val buffer = fetchGet("buffer")!!.hex2ByteArray()
-        val qimei36 = fetchGet("qimei36", def = QSecConfig.business_q36)!!
+        val uin = call.request.queryParameters["uin"] ?: throw BadRequestException("Missing 'uin'")
+        val qua = call.request.queryParameters["qua"] ?: QSecConfig.business_qua
+        val cmd = call.request.queryParameters["cmd"] ?: throw BadRequestException("Missing 'cmd'")
+        val seq = call.request.queryParameters["seq"]?.toInt() ?: throw BadRequestException("Missing or invalid 'seq'")
+        val buffer = call.request.queryParameters["buffer"]?.hex2ByteArray() ?: throw BadRequestException("Missing 'buffer'")
+        val qimei36 = call.request.queryParameters["qimei36"] ?: QSecConfig.business_q36
 
-        requestSign(cmd, uin, qua, seq, buffer, qimei36)
+        call.requestSign(cmd, uin, qua, seq, buffer, qimei36)
     }
 
     post("/sign") {
         val param = call.receiveParameters()
-        val uin = fetchPost(param, "uin")!!
-        val qua = fetchPost(param, "qua", QSecConfig.business_qua)!!
-        val cmd = fetchPost(param, "cmd")!!
-        val seq = fetchPost(param, "seq")!!.toInt()
-        val buffer = fetchPost(param, "buffer")!!.hex2ByteArray()
-        val qimei36 = fetchPost(param, "qimei36", def = "")!!
+        val uin = param["uin"] ?: throw BadRequestException("Missing 'uin'")
+        val qua = param["qua"] ?: QSecConfig.business_qua
+        val cmd = param["cmd"] ?: throw BadRequestException("Missing 'cmd'")
+        val seq = param["seq"]?.toInt() ?: throw BadRequestException("Missing or invalid 'seq'")
+        val buffer = param["buffer"]?.hex2ByteArray() ?: throw BadRequestException("Missing 'buffer'")
+        val qimei36 = param["qimei36"] ?: ""
 
-        requestSign(cmd, uin, qua, seq, buffer, qimei36)
+        call.requestSign(cmd, uin, qua, seq, buffer, qimei36)
     }
 }
 
@@ -52,7 +51,7 @@ private data class Sign(
     val o3did: String
 )
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(cmd: String, uin: String, qua: String, seq: Int, buffer: ByteArray, qimei36: String = QSecConfig.business_q36) {
+private suspend fun ApplicationCall.requestSign(cmd: String, uin: String, qua: String, seq: Int, buffer: ByteArray, qimei36: String = QSecConfig.business_q36) {
     FEKit.changeUin(uin.toLong())
 
     fun int32ToBuf(i: Int): ByteArray {
@@ -66,10 +65,11 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(cmd: Stri
 
     val sign = QQSecuritySign.getSign(QSec, qua, cmd, buffer, int32ToBuf(seq), uin)!!
 
-    call.respond(
+    respond(
         APIResult(0, "success", Sign(
-        sign.token.toHexString(),
-        sign.extra.toHexString(),
-        sign.sign.toHexString(), QSecConfig.business_o3did ?: ""
-    )))
+            sign.token.toHexString(),
+            sign.extra.toHexString(),
+            sign.sign.toHexString(), QSecConfig.business_o3did ?: ""
+        ))
+    )
 }
