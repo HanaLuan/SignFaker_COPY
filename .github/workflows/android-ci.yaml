@@ -1,0 +1,153 @@
+name: Android CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+      - 'renovate.json'
+      - '.editorconfig'
+      - '.gitignore'
+      - '.github/**'
+      - '.idea/**'
+      - '!.github/workflows/**'
+
+jobs:
+  build:
+    name: Android CI (Push)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_HARDLINK: "true"
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+    if: ${{ !startsWith(github.event.head_commit.message, '[skip ci]') }} && success() && github.ref == 'refs/heads/main' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Set Release info
+        run: |
+          echo "TAG_NAME=${{ github.event.repository.name }}_$(date +'%Y-%b-%d')_$(date +'%s')" >> $GITHUB_ENV
+          echo "RELEASE_NAME=${{ github.event.repository.name }}_Actions_$(date +'%Y-%b-%d')" >> $GITHUB_ENV
+          echo $TAG_NAME
+          echo $RELEASE_NAME
+
+      - name: Config submodules
+        run: |
+          git -C "mmkv/MMKV" config "submodule.Python/pybind11.update" none
+          git submodule foreach git submodule update --init --recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4.7.1
+        with:
+          java-version: '21'
+          distribution: 'jetbrains'
+
+      - name: Setup AndroidSDK
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}"
+          mkdir -p "$ANDROID_HOME/licenses/"
+          echo > "$ANDROID_HOME/licenses/android-sdk-license"
+          echo -n 24333f8a63b6825ea9c5514f83c2829b004d1fee > "$ANDROID_HOME/licenses/android-sdk-license"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.0"
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: |
+          echo 'org.gradle.parallel=true' >> gradle.properties
+          echo 'org.gradle.vfs.watch=true' >> gradle.properties
+          sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
+          echo 'buildCache { local { removeUnusedEntriesAfterDays = 7 } }' >> settings.gradle.kts
+          echo ${{ secrets.SIGN_KEYSTORE_BASE64 }} | base64 -d > keystore.jks
+          ./gradlew :app:assembleDebug
+          ccache -s 2>/dev/null | tee
+          find ./app/build/outputs/apk/debug -type f -name "*.apk" 2>/dev/null > $HOME/apkFiles.txt
+          cat $HOME/apkFiles.txt
+          ./gradlew :app:extractReleaseNativeDebugMetadata
+          echo "SYMBOL_FILE=app/build/intermediates/native_debug_metadata/release/extractReleaseNativeDebugMetadata/out" >> $GITHUB_ENV
+        env:
+          KEYSTORE_PATH: "../keystore.jks"
+          KEYSTORE_PASSWORD: ${{ secrets.SIGN_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SIGN_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+
+      - name: Show Artifacts SHA256
+        run: |
+          echo "### Build Success :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "|File Name|SHA256|" >> $GITHUB_STEP_SUMMARY
+          echo "|:--------:|:----------|" >> $GITHUB_STEP_SUMMARY
+          while read -r file; do
+            if [[ -f "$file" ]]; then
+              sha256=$(sha256sum "$file" | awk '{print $1}')
+              filename=$(basename "$file")
+              echo "|$filename|$sha256|" >> $GITHUB_STEP_SUMMARY
+            fi
+          done < "$HOME/apkFiles.txt"
+          build_time="$(date +'%m-%d-%Y')_$(date +%s)"
+          echo "| **BuildTime: $build_time** |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check and Upload Artifacts
+        run: |
+          if [[ -s "$HOME/apkFiles.txt" ]]; then
+            echo "Detected APK files. Starting upload..."
+            echo "APK_FILES=$(cat $HOME/apkFiles.txt | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "ExecutePreRelease=true" >> $GITHUB_ENV
+          else
+            echo "No APK files found. Skipping upload."
+          fi
+
+      - name: Upload Artifacts (apk)
+        if: ${{ env.APK_FILES != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SignFaker-${{ github.event.head_commit.id }}
+          path: ${{ env.APK_FILES }}
+
+      - name: Upload Artifacts(symbol)
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.SYMBOL_FILE }}
+          name: SignFaker-${{ github.event.head_commit.id }}-symbol
+
+      - name: Create Pre-Release TAG
+        if: ${{env.ExecutePreRelease == 'true'}}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: ${{env.TAG_NAME}}
+          release_name: ${{env.RELEASE_NAME}}
+          draft: false
+          prerelease: true
+
+      - name: Upload files
+        if: ${{env.ExecutePreRelease == 'true'}}
+        id: find_and_upload_files
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          while IFS= read -r file; do
+            basename=$(basename "$file" .apk)
+            GITHUB_UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}
+            GITHUB_UPLOAD_URL="${GITHUB_UPLOAD_URL%\{*}"
+            GITHUB_UPLOAD_URL="${GITHUB_UPLOAD_URL%\?*}"
+            curl \
+              -X POST \
+              -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"${file}" \
+              "${GITHUB_UPLOAD_URL}?name=${basename}.apk&label=${tagName}_${basename}.apk"
+          done < $HOME/apkFiles.txt
