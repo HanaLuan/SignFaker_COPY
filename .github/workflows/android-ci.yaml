@@ -59,7 +59,7 @@ jobs:
           mkdir -p "$ANDROID_HOME/licenses/"
           echo > "$ANDROID_HOME/licenses/android-sdk-license"
           echo -n 24333f8a63b6825ea9c5514f83c2829b004d1fee > "$ANDROID_HOME/licenses/android-sdk-license"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.0" "build-tools;30.0.3"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.0" "build-tools;36.0.0"
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
 
       - name: Setup Gradle
@@ -85,6 +85,16 @@ jobs:
           KEY_ALIAS: ${{ secrets.SIGN_ALIAS }}
           KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
 
+      - name: Find Latest apksigner
+        run: |
+          APK_SIGNER_PATH=$(find $ANDROID_HOME/build-tools -type f -name "apksigner" | sort -V | tail -n 1)
+          if [[ -z "$APK_SIGNER_PATH" ]]; then
+            echo "Error: apksigner not found!"
+            exit 1
+          fi
+          echo "Using apksigner at: $APK_SIGNER_PATH"
+          echo "APK_SIGNER_PATH=$APK_SIGNER_PATH" >> $GITHUB_ENV
+
       - name: Sign APK Files
         run: |
           if [[ ! -s "$HOME/apkFiles.txt" ]]; then
@@ -94,7 +104,7 @@ jobs:
           while read -r file; do
             if [[ -f "$file" ]]; then
               echo "Signing $file..."
-              apksigner sign --ks "$HOME/keystore.jks" \
+              "$APK_SIGNER_PATH" sign --ks "$HOME/keystore.jks" \
                 --ks-pass pass:"$KEYSTORE_PASSWORD" \
                 --ks-key-alias "$KEY_ALIAS" \
                 --key-pass pass:"$KEY_PASSWORD" \
@@ -104,16 +114,16 @@ jobs:
                 --v3-signing-enabled true \
                 "$file"
               rm -rf "$file" && mv "${file%.apk}-signed.apk" "$file"
-              apksigner verify -v "$file"
+              "$APK_SIGNER_PATH" verify -v "$file"
             else
               echo "Warning: File $file not found, skipping..."
             fi
           done < "$HOME/apkFiles.txt"
         env:
+          APK_SIGNER_PATH: ${{ env.APK_SIGNER_PATH }}
           KEYSTORE_PASSWORD: ${{ secrets.SIGN_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.SIGN_ALIAS }}
           KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
-
 
       - name: Show Artifacts SHA256
         run: |
