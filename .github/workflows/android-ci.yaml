@@ -112,6 +112,7 @@ jobs:
                 --v1-signing-enabled true \
                 --v2-signing-enabled true \
                 --v3-signing-enabled true \
+                --v4-signing-enabled true \
                 "$file"
               rm -rf "$file" && mv "${file%.apk}-signed.apk" "$file"
               "$APK_SIGNER_PATH" verify -v "$file"
