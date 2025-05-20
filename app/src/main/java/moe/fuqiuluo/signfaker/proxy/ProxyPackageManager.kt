@@ -33,8 +33,8 @@ class ProxyPackageManager(
         if (name == "com.tencent.mobileqq") {
             return myPackageManager.getPackageInfo("moe.fuqiuluo.signfaker", flags).also {
                 //it.packageName = name
-                it.versionName = "8.9.68"
-                it.versionCode = 4264
+                it.versionName = "2.1.7"
+                it.versionCode = 1130
             }
         }
         return myPackageManager.getPackageInfo(name, flags)

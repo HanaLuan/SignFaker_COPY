@@ -26,7 +26,7 @@ fun Routing.index() {
         val out = APIResult(0, "IAA", APIInfo(
             version = "1.1.6",
             appVersion = "${Config.AppVersionName}/${Config.AppVersionCode}",
-            protocol = "v8.9.68",
+            protocol = "v2.1.7",
             pid = android.os.Process.myPid().toUInt()
         ))
         kotlin.runCatching {

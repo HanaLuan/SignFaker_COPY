@@ -30,6 +30,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.signfaker.http.HttpServer
 import moe.fuqiuluo.signfaker.logger.TextLogger
 import moe.fuqiuluo.signfaker.logger.TextLogger.log
@@ -41,6 +42,7 @@ import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 import java.security.Security
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resume
 
 
 class MainActivity : AppCompatActivity() {
@@ -205,29 +207,24 @@ class MainActivity : AppCompatActivity() {
     private suspend fun initServer() {
         log("请输入启动在哪个服务器端口：")
 
-        var port = 0
-        send.setOnClickListener {
-            TextLogger.input(">>> ${input.text}")
-            kotlin.runCatching {
-                val myPort = input.text.toString().toInt()
-                if (myPort !in 1000 .. 64000) {
-                    throw IllegalArgumentException()
-                } else {
-                    port = myPort
+        val port = suspendCancellableCoroutine<Int> { cont ->
+            send.setOnClickListener {
+                TextLogger.input(">>> ${input.text}")
+                kotlin.runCatching {
+                    val myPort = input.text.toString().toInt()
+                    if (myPort !in 1000..64000) {
+                        throw IllegalArgumentException()
+                    } else {
+                        cont.resume(myPort)
+                    }
+                }.onFailure {
+                    input.setText("")
+                    log("错误输入，请重新尝试")
                 }
-            }.onFailure {
-                input.setText("")
-                log("错误输入，请重新尝试")
             }
         }
 
-        while (port == 0) {
-            delay(3000)
-            log("期待输入中 (3s) ...... ")
-        }
-
         log("服务器将运行在端口：$port")
-
         HttpServer(port)
     }
 
@@ -237,7 +234,7 @@ class MainActivity : AppCompatActivity() {
         Dtc.ctx = WeakReference(ctx)
         UserAction.initUserAction(ctx, false)
         UserAction.setAppKey("0S200MNJT807V3E")
-        UserAction.setAppVersion("8.9.68")
+        UserAction.setAppVersion("2.1.7")
 
         var qimei = ""
         UserAction.getQimei {
@@ -246,7 +243,7 @@ class MainActivity : AppCompatActivity() {
             QSecConfig.business_q36 = it.toString()
         }
 
-        val qua = "V1_AND_SQ_8.9.68_4264_YYB_D"
+        val qua = "V1_WAT_SQ_2.1.7_002_IDC_B"
 
         val cs = contentResolver
         log("预设androidId为：${Settings.System.getString(cs, "android_id")}")
@@ -258,16 +255,12 @@ class MainActivity : AppCompatActivity() {
             androidId = input.text.toString()
             input.setText("")
         }
-        while (androidId.isEmpty()) {
+        while (!androidId.isNotEmpty()) {
             delay(3000)
-            log("期许输入中 (3s) ...... ")
         }
         log("你的androidId输入为[$androidId]")
         Settings.System.putString(cs, "android_id", androidId)
         Dtc.androidId = androidId
-        log("尝试载入FEKIT二进制库...")
-        System.loadLibrary("fekit")
-        log("载入FEKIT二进制库成功...")
         FEKit.init(qua, qimei, androidId, ctx)
 /*        ChannelManager.setChannelProxy(object: ChannelProxy() {
             override fun sendMessage(cmd: String, buffer: ByteArray, id: Long) {

@@ -47,6 +47,43 @@ class ProxyContext(
     private val realFilesDir: String
     private val realLibDir: String
 
+    private fun decodeFlags(flags: Int): String {
+        val result = mutableListOf<String>()
+
+        if ((flags and ApplicationInfo.FLAG_SYSTEM) != 0)
+            result += "FLAG_SYSTEM"
+        if ((flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0)
+            result += "FLAG_DEBUGGABLE"
+        if ((flags and ApplicationInfo.FLAG_HAS_CODE) != 0)
+            result += "FLAG_HAS_CODE"
+        if ((flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
+            result += "FLAG_UPDATED_SYSTEM_APP"
+        if ((flags and ApplicationInfo.FLAG_ALLOW_TASK_REPARENTING) != 0)
+            result += "FLAG_ALLOW_TASK_REPARENTING"
+        if ((flags and ApplicationInfo.FLAG_PERSISTENT) != 0)
+            result += "FLAG_PERSISTENT"
+        if ((flags and ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0)
+            result += "FLAG_RESIZEABLE_FOR_SCREENS"
+        if ((flags and ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0)
+            result += "FLAG_SUPPORTS_SCREEN_DENSITIES"
+        if ((flags and ApplicationInfo.FLAG_LARGE_HEAP) != 0)
+            result += "FLAG_LARGE_HEAP"
+        if ((flags and ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0)
+            result += "FLAG_EXTERNAL_STORAGE"
+        if ((flags and ApplicationInfo.FLAG_IS_GAME) != 0)
+            result += "FLAG_IS_GAME"
+        if ((flags and ApplicationInfo.FLAG_STOPPED) != 0)
+            result += "FLAG_STOPPED"
+        if ((flags and ApplicationInfo.FLAG_SUSPENDED) != 0)
+            result += "FLAG_SUSPENDED"
+        if ((flags and ApplicationInfo.FLAG_MULTIARCH) != 0)
+            result += "FLAG_MULTIARCH"
+        if ((flags and ApplicationInfo.FLAG_INSTALLED) != 0)
+            result += "FLAG_INSTALLED"
+
+        return if (result.isEmpty()) "NONE" else result.joinToString(" | ")
+    }
+
     init {
         val resolve = File(myContext.cacheDir, "fekit")
         this.fekitDir = resolve
@@ -64,19 +101,33 @@ class ProxyContext(
     }
 
     private fun getFakeApplicationInfo(applicationInfo: ApplicationInfo, realLibDir: String): ApplicationInfo {
-        val proxyApplicationInfo = ProxyApplicationInfo(ApplicationInfo())
-        proxyApplicationInfo.packageName = applicationInfo.packageName
+        val proxyApplicationInfo = ApplicationInfo()
+        proxyApplicationInfo.packageName = "com.tencent.qqlite"
         proxyApplicationInfo.className = applicationInfo.className
-        proxyApplicationInfo.targetSdkVersion = 31
+        proxyApplicationInfo.targetSdkVersion = 26
         proxyApplicationInfo.nativeLibraryDir = realLibDir
         proxyApplicationInfo.flags = applicationInfo.flags and (-3)
-        log(String.format(
-            "FakePackageName = %s\nFakeClassName = %s\nFakeTargetSdkVersion = %s\nFakeNativeLibraryDir = %s",
-            applicationInfo.packageName,
-            applicationInfo.className,
-            proxyApplicationInfo.targetSdkVersion,
-            realFilesDir)
-        )
+
+        log("""
+        ====== ApplicationInfo Dump ======
+        ──[ Original Info ]────────────────────
+        packageName        = ${applicationInfo.packageName}
+        className          = ${applicationInfo.className}
+        targetSdkVersion   = ${applicationInfo.targetSdkVersion}
+        sourceDir          = ${applicationInfo.sourceDir}
+        dataDir            = ${applicationInfo.dataDir}
+        nativeLibraryDir   = ${applicationInfo.nativeLibraryDir}
+        flags              = ${String.format("0x%08X", applicationInfo.flags)} (${decodeFlags(applicationInfo.flags)})
+
+        ──[ Proxy/Fake Info ]──────────────────
+        packageName        = ${proxyApplicationInfo.packageName}
+        className          = ${proxyApplicationInfo.className}
+        targetSdkVersion   = ${proxyApplicationInfo.targetSdkVersion}
+        nativeLibraryDir   = ${proxyApplicationInfo.nativeLibraryDir}
+        flags              = ${String.format("0x%08X", proxyApplicationInfo.flags)} (${decodeFlags(proxyApplicationInfo.flags)})
+
+        =======================================
+    """.trimIndent())
         return proxyApplicationInfo
     }
     /*~~End~~*/
