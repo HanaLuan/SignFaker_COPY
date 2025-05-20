@@ -2,9 +2,8 @@ package moe.fuqiuluo.signfaker.http.ext
 
 import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
-import io.ktor.util.pipeline.PipelineContext
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import java.util.Locale
@@ -18,24 +17,29 @@ data class APIResult<T>(
     val data: T? = null
 )
 
-suspend fun PipelineContext<Unit, ApplicationCall>.fetchGet(key: String, def: String? = null, err: String? = "Parameter '$key' is missing."): String? {
-    val data = call.parameters[key] ?: def
-    if (data == null && err != null) {
-        failure(1, err)
+// query string
+suspend fun ApplicationCall.queryParam(key: String, def: String? = null, err: String? = null): String? {
+    if (request.queryParameters[key].isNullOrBlank() && def == null) {
+        val errorMsg = err ?: "Missing parameter '$key'"
+        respond(APIResult<Nothing>(1, errorMsg))
+        return null
     }
-    return data
+    return request.queryParameters[key] ?: def
 }
 
-suspend fun PipelineContext<Unit, ApplicationCall>.fetchPost(params: Parameters, key: String, def: String? = null, err: String? = "Parameter '$key' is missing."): String? {
-    val data = params[key] ?: def
-    if (data == null && err != null) {
-        failure(1, err)
+// form-urlencoded
+suspend fun ApplicationCall.formParam(key: String, def: String? = null, err: String? = null): String? {
+    val postParams: Parameters = receiveParameters()
+    if (postParams[key].isNullOrBlank() && def == null) {
+        val errorMsg = err ?: "Missing parameter '$key'"
+        respond(APIResult<Nothing>(1, errorMsg))
+        return null
     }
-    return data
+    return postParams[key] ?: def
 }
 
-suspend fun PipelineContext<Unit, ApplicationCall>.failure(code: Int, msg: String) {
-    call.respond(APIResult(code, msg, "failed"))
+suspend fun ApplicationCall.failure(code: Int, msg: String) {
+    respond(APIResult(code, msg, "failed"))
 }
 
 @JvmOverloads fun String.hex2ByteArray(replace: Boolean = false): ByteArray {

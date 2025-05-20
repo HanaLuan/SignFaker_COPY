@@ -11,11 +11,13 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Message
 import android.provider.Settings
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.updatePadding
 import com.tencent.beacon.event.UserAction
 import com.tencent.mmkv.MMKV
 import com.tencent.mobileqq.channel.ChannelManager
@@ -75,6 +77,54 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val scrollView = findViewById<View>(R.id.scrollView)
+        val bottomBar = findViewById<View>(R.id.bottomBar)
+        /* ViewCompat.setFitsSystemWindows(scrollView, true)
+        ViewCompat.setFitsSystemWindows(bottomBar, true)
+        ViewCompat.setFitsSystemWindows(findViewById(android.R.id.content), true)
+        val decorView = window.decorView
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        )
+        window.statusBarColor = 0
+        window.navigationBarColor = 0 */
+        // androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+
+        // 处理顶部、底部、左右安全区和软键盘
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(scrollView) { view, insets ->
+            val sysBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
+            view.updatePadding(
+                top = sysBars.top,
+                left = sysBars.left,
+                right = sysBars.right
+            )
+            insets
+        }
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(bottomBar) { view, insets ->
+            val sysBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
+            // 软键盘弹出时优先用ime.bottom，否则用系统栏
+            val bottomInset = kotlin.math.max(sysBars.bottom, ime.bottom)
+            view.updatePadding(
+                bottom = bottomInset,
+                left = sysBars.left,
+                right = sysBars.right
+            )
+            insets
+        }
+
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        val controller = androidx.core.view.WindowInsetsControllerCompat(window, window.decorView)
+        val isDarkTheme = when (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
+            android.content.res.Configuration.UI_MODE_NIGHT_YES -> true
+            else -> false
+        }
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
+        controller.isAppearanceLightNavigationBars = false
 
         val text = findViewById<TextView>(R.id.text)
         TextLogger.updateTextHandler = object: Handler(mainLooper) {
@@ -192,8 +242,8 @@ class MainActivity : AppCompatActivity() {
         var qimei = ""
         UserAction.getQimei {
             log("QIMEI FETCH 成功： $it")
-            qimei = it
-            QSecConfig.business_q36 = it
+            qimei = it.toString()
+            QSecConfig.business_q36 = it.toString()
         }
 
         val qua = "V1_AND_SQ_8.9.68_4264_YYB_D"
