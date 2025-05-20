@@ -129,12 +129,18 @@ class MainActivity : AppCompatActivity() {
         controller.isAppearanceLightNavigationBars = false
 
         val text = findViewById<TextView>(R.id.text)
-        TextLogger.updateTextHandler = object: Handler(mainLooper) {
+        val logQueue: ArrayDeque<String> = ArrayDeque()
+        val maxLines = 24
+        TextLogger.updateTextHandler = object : Handler(mainLooper) {
             @SuppressLint("SetTextI18n")
             override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
                 if (msg.what == TextLogger.WHAT_INFO) {
-                    text.text = text.text.toString() + "\n" + msg.obj
+                    logQueue.add(msg.obj.toString())
+                    if (logQueue.size > maxLines) {
+                        logQueue.removeFirst()
+                    }
+                    text.text = logQueue.joinToString("\n")  // 仅更新可视文本
                 }
             }
         }
