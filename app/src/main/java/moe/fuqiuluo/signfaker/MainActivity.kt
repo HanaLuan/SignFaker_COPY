@@ -131,16 +131,19 @@ class MainActivity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.text)
         val logQueue: ArrayDeque<String> = ArrayDeque()
         val maxLines = 24
+        val duplicateCheckSize = 4
         TextLogger.updateTextHandler = object : Handler(mainLooper) {
             @SuppressLint("SetTextI18n")
             override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
                 if (msg.what == TextLogger.WHAT_INFO) {
-                    logQueue.add(msg.obj.toString())
-                    if (logQueue.size > maxLines) {
-                        logQueue.removeFirst()
-                    }
-                    text.text = logQueue.joinToString("\n")  // 仅更新可视文本
+                    val newLog = msg.obj.toString()
+                    val newLogTrimmed = newLog.drop(10)
+                    val isDuplicate = logQueue.takeLast(duplicateCheckSize)
+                        .any { it.drop(10) == newLogTrimmed }
+                    if (!isDuplicate) { logQueue.add(newLog) }
+                    if (logQueue.size > maxLines) { logQueue.removeFirst() }
+                    text.text = logQueue.joinToString("\n")
                 }
             }
         }
